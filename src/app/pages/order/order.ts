@@ -25,6 +25,8 @@ export class Order {
 
   public orderId: any = signal(null);
   public calculationResult: any = signal(null);
+  public isLoading: any = signal(false);
+  public isLoadingFadeOut: any = signal(false);
 
 
   constructor(private formBuilder: FormBuilder, private deliveryApi: DeliveryApi) {
@@ -55,6 +57,14 @@ export class Order {
     });
   }
 
+  private hideLoader() {
+    this.isLoadingFadeOut.set(true);
+    setTimeout(() => {
+      this.isLoading.set(false);
+      this.isLoadingFadeOut.set(false);
+    }, 300);
+  }
+
   public selectSize(size: string) {
     this.routeForm.controls['size'].setValue(size);
   }
@@ -65,8 +75,10 @@ export class Order {
 
   public calculate() {
     this.calculationResult.set(null);
+    this.isLoading.set(true);
 
     if (!this.map || this.routeForm.invalid) {
+      this.isLoading.set(false);
       return;
     }
 
@@ -114,6 +126,7 @@ export class Order {
           total,
           speed
         });
+        this.hideLoader();
       } catch (err) {
         this.failedCalculation();
       }
@@ -124,6 +137,7 @@ export class Order {
 
   private failedCalculation() {
     this.calculationResult.set(null);
+    this.hideLoader();
     alert('Не удалось построить маршрут. Проверьте адреса и выбранные параметры.');
   }
 
